@@ -1,14 +1,21 @@
 defmodule Sum do
   defmacro defsum({name, _, arg}) when arg in [nil, []] do
-    quote do
-      name = unquote(name)
-
-      types =
+    quote bind_quoted: binding() do
+      type_clauses =
         Module.get_attribute(__MODULE__, :type)
-        |> Sum.parse_types()
+        |> Sum.get_clauses!(name)
 
-      clauses = types[name] || raise Sum.TypeNotFound, {name, __MODULE__, types}
+      defmacro unquote(:"#{name}_case")(item, do: clauses) do
+        # TODO: Check all cases are accounted for
+        {:case, [], [item, [do: clauses]]}
+      end
     end
+  end
+
+  @doc false
+  def get_clauses!(types, name) do
+    defs = parse_types(types)
+    defs[name] || raise(Sum.TypeNotFound, {name, __MODULE__, defs})
   end
 
   @doc false
@@ -32,13 +39,16 @@ defmodule Thingy do
 
   @type other :: {:ok, term}
   @type thing :: {:ok, term} | :ko
-  @type t ::
-          {:ok, term}
-          | :error
-          | :not_found
-          | :another_one
-          | :and_another
-          | :one_last_one
-          | :do_i_seriously_need_another
+  @type t :: {:ok, term} | :error | :not_found | :another_one
   Sum.defsum(t)
+
+  def run(thing) do
+    t_case thing do
+      1 ->
+        "one"
+
+      _ ->
+        "not one"
+    end
+  end
 end

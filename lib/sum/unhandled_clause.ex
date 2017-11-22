@@ -16,7 +16,7 @@ defmodule Sum.UnhandledClause do
 
       #{list_doc}
 
-      Add new patterns to the #{name}_case that match these.
+      Add new clauses to the #{name}_case to match these.
       """
 
     %__MODULE__{message: message}

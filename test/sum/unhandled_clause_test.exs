@@ -22,7 +22,7 @@ defmodule Sum.UnhandledClauseTest do
                * :error
                * :maybe_ok
 
-           Add new patterns to the result_case that match these.
+           Add new clauses to the result_case to match these.
            """
   end
 end

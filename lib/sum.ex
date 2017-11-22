@@ -31,13 +31,31 @@ defmodule Sum do
     if unmatched == [] do
       {:case, [], [item, [do: case_clauses]]}
     else
-      # TODO: Nice error
-
-      raise Sum.UnhandledClause, {__MODULE__, name, unmatched}
+      raise(Sum.UnhandledClause, {__MODULE__, name, unmatched})
     end
   end
 
   @doc false
+  def matches?(pattern, {:integer, _, _}) when is_integer(pattern) do
+    true
+  end
+
+  def matches?(pattern, {:non_neg_integer, _, _}) when is_integer(pattern) and pattern >= 0 do
+    true
+  end
+
+  def matches?(pattern, {:neg_integer, _, _}) when is_integer(pattern) and pattern < 0 do
+    true
+  end
+
+  def matches?(pattern, {:pos_integer, _, _}) when is_integer(pattern) and pattern > 0 do
+    true
+  end
+
+  def matches?(pattern, type) when is_integer(pattern) do
+    pattern === type
+  end
+
   def matches?(pattern, {:atom, _, _}) when is_atom(pattern) do
     true
   end
@@ -84,17 +102,23 @@ defmodule Thingy do
 
   def run(thing) do
     t_case thing do
-      :ok ->
+      {:ok, _} ->
         1
 
       :error ->
         2
 
-      # 1 when is_list(thing) ->
-      #   "one"
+      :not_found ->
+        2
 
-      _ ->
-        "not one"
+      :another_one ->
+        2
+
+        # 1 when is_list(thing) ->
+        #   "one"
+
+        # _ ->
+        #   "not one"
     end
   end
 end

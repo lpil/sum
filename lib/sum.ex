@@ -3,7 +3,7 @@ defmodule Sum do
     quote bind_quoted: binding() do
       type_clauses =
         Module.get_attribute(__MODULE__, :type)
-        |> Sum.get_clauses!(type_name)
+        |> Sum.get_clauses!(__MODULE__, type_name)
 
       defmacro unquote(:"#{type_name}_case")(subject, do: case_clauses) do
         Sum.build_case!(
@@ -32,7 +32,8 @@ defmodule Sum do
       {:case, [], [item, [do: case_clauses]]}
     else
       # TODO: Nice error
-      throw({:incomplete, name, unmatched})
+
+      raise Sum.UnhandledClause, {__MODULE__, name, unmatched}
     end
   end
 
@@ -52,9 +53,9 @@ defmodule Sum do
   end
 
   @doc false
-  def get_clauses!(types, name) do
+  def get_clauses!(types, mod, name) do
     defs = parse_types(types)
-    defs[name] || raise(Sum.TypeNotFound, {name, __MODULE__, defs})
+    defs[name] || raise(Sum.TypeNotFound, {name, mod, defs})
   end
 
   @doc false
@@ -83,8 +84,14 @@ defmodule Thingy do
 
   def run(thing) do
     t_case thing do
-      1 when is_list(thing) ->
-        "one"
+      :ok ->
+        1
+
+      :error ->
+        2
+
+      # 1 when is_list(thing) ->
+      #   "one"
 
       _ ->
         "not one"
